@@ -23,3 +23,17 @@ func WithSetMaxNum(num int) Setter {
 		p.MaxWorkNum = num
 	}
 }
+
+func (p *pool) add(w *worker) {
+	p.WorkPool <- w
+}
+
+func (p *pool) dispatch() {
+	go func() {
+		select {
+		case w := <-p.WorkPool:
+			j := new(job)
+			w.submit(j)
+		}
+	}()
+}
