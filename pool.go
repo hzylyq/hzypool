@@ -32,8 +32,7 @@ func (p *pool) dispatch() {
 	go func() {
 		select {
 		case w := <-p.WorkPool:
-			j := new(job)
-			w.submit(j)
+			w.do()
 		}
 	}()
 }
