@@ -2,7 +2,7 @@ package hzypool
 
 type pool struct {
 	MaxWorkNum int
-	WorkPool   chan *worker
+	WorkPool   chan *Worker
 }
 
 func New(sl ...Setter) *pool {
@@ -11,9 +11,9 @@ func New(sl ...Setter) *pool {
 		s(p)
 	}
 
-	p.WorkPool = make(chan *worker, p.MaxWorkNum)
+	p.WorkPool = make(chan *Worker, p.MaxWorkNum)
 
-	return &pool{}
+	return p
 }
 
 type Setter func(p *pool)
@@ -24,7 +24,7 @@ func WithSetMaxNum(num int) Setter {
 	}
 }
 
-func (p *pool) add(w *worker) {
+func (p *pool) Add(w *Worker) {
 	p.WorkPool <- w
 }
 
@@ -35,4 +35,8 @@ func (p *pool) dispatch() {
 			w.do()
 		}
 	}()
+}
+
+func (p *pool) Run() {
+	p.dispatch()
 }

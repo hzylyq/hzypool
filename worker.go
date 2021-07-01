@@ -4,15 +4,15 @@ import "context"
 
 type fn func(ctx context.Context, arg interface{}) error
 
-type worker struct {
+type Worker struct {
 	Fn  fn
 	Arg interface{}
 }
 
-func (w *worker) submit() {
+func (w *Worker) submit() {
 
 }
 
-func (w *worker) do() error {
+func (w *Worker) do() error {
 	return w.Fn(context.Background(), w.Arg)
 }
