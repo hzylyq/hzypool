@@ -2,6 +2,7 @@ package hzypool_test
 
 import (
 	"context"
+	"log"
 	"sync"
 	"testing"
 	"time"
@@ -26,9 +27,13 @@ func TestNew(t *testing.T) {
 			Arg: nil,
 		})
 	}
+
+	wg.Done()
+	wg.Wait()
 }
 
 func fn(ctx context.Context, arg interface{}) error {
 	time.Sleep(1 * time.Second)
+	log.Print("run")
 	return nil
 }

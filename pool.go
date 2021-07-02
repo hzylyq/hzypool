@@ -37,12 +37,15 @@ func (p *pool) Add(w *Worker) {
 }
 
 func (p *pool) dispatch() {
-	for {
-		select {
-		case w := <-p.WorkPool:
-			w.do()
-		default:
-			// todo handle
+	go func() {
+		for {
+			select {
+			case w := <-p.WorkPool:
+				w.do()
+			default:
+				w := <-p.WorkPool
+				w.do()
+			}
 		}
-	}
+	}()
 }
