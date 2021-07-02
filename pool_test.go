@@ -2,9 +2,9 @@ package hzypool_test
 
 import (
 	"context"
-	"log"
 	"sync"
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/assert"
 
@@ -12,7 +12,9 @@ import (
 )
 
 func TestNew(t *testing.T) {
-	p, err := hzypool.New(hzypool.WithSetMaxNum(10))
+	p, err := hzypool.New(
+		hzypool.WithSetMaxNum(10),
+		hzypool.WithSetMaxWorkDuration(10*time.Second))
 	assert.NoError(t, err)
 
 	var wg sync.WaitGroup
@@ -29,6 +31,6 @@ func TestNew(t *testing.T) {
 }
 
 func fn(ctx context.Context, arg interface{}) error {
-	log.Print("run 1")
+	time.Sleep(11 * time.Second)
 	return nil
 }

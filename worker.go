@@ -7,6 +7,8 @@ type fn func(ctx context.Context, arg interface{}) error
 type Worker struct {
 	Fn  fn
 	Arg interface{}
+
+	p *pool
 }
 
 func (w *Worker) submit() {
@@ -14,5 +16,11 @@ func (w *Worker) submit() {
 }
 
 func (w *Worker) do() error {
-	return w.Fn(context.Background(), w.Arg)
+	ctx, cancel := context.WithTimeout(context.Background(), w.p.maxWorkDuration)
+
+	defer func() {
+		cancel()
+	}()
+
+	return w.Fn(ctx, w.Arg)
 }

@@ -4,11 +4,14 @@ import (
 	"fmt"
 	"log"
 	"runtime"
+	"time"
 )
 
 type pool struct {
-	maxWorkNum int
-	WorkPool   chan *Worker
+	WorkPool        chan *Worker
+	Job             chan *Worker
+	maxWorkNum      int
+	maxWorkDuration time.Duration
 }
 
 func New(sl ...Setter) (*pool, error) {
@@ -23,19 +26,13 @@ func New(sl ...Setter) (*pool, error) {
 	}
 
 	p.WorkPool = make(chan *Worker, p.maxWorkNum)
+	p.Job = make(chan *Worker, 1)
 
 	return p, nil
 }
 
-type Setter func(p *pool)
-
-func WithSetMaxNum(num int) Setter {
-	return func(p *pool) {
-		p.maxWorkNum = num
-	}
-}
-
 func (p *pool) Add(w *Worker) {
+	w.p = p
 	p.WorkPool <- w
 }
 
@@ -51,7 +48,6 @@ func (p *pool) dispatch() {
 			}
 		}
 	}()
-
 }
 
 func (p *pool) Run() {
