@@ -8,8 +8,8 @@ import (
 )
 
 type pool struct {
-	WorkPool        chan *Worker
-	Job             chan *Worker
+	WorkPool chan *Worker
+	// Job             chan *Worker
 	maxWorkNum      int
 	maxWorkDuration time.Duration
 }
@@ -26,7 +26,7 @@ func New(sl ...Setter) (*pool, error) {
 	}
 
 	p.WorkPool = make(chan *Worker, p.maxWorkNum)
-	p.Job = make(chan *Worker, 1)
+	// p.Job = make(chan *Worker, 1)
 
 	return p, nil
 }
@@ -37,17 +37,15 @@ func (p *pool) Add(w *Worker) {
 }
 
 func (p *pool) dispatch() {
-	go func() {
-		for {
-			select {
-			case w := <-p.WorkPool:
-				log.Print("case")
-				w.do()
-			default:
-				log.Printf("default")
-			}
+	for {
+		select {
+		case w := <-p.WorkPool:
+			log.Print("case")
+			w.do()
+		default:
+			log.Printf("default")
 		}
-	}()
+	}
 }
 
 func (p *pool) Run() {
