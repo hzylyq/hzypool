@@ -2,7 +2,6 @@ package hzypool
 
 import (
 	"fmt"
-	"log"
 	"runtime"
 	"time"
 )
@@ -26,7 +25,8 @@ func New(sl ...Setter) (*pool, error) {
 	}
 
 	p.WorkPool = make(chan *Worker, p.maxWorkNum)
-	// p.Job = make(chan *Worker, 1)
+
+	p.dispatch()
 
 	return p, nil
 }
@@ -40,14 +40,9 @@ func (p *pool) dispatch() {
 	for {
 		select {
 		case w := <-p.WorkPool:
-			log.Print("case")
 			w.do()
 		default:
-			log.Printf("default")
+			// todo handle
 		}
 	}
-}
-
-func (p *pool) Run() {
-	p.dispatch()
 }

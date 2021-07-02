@@ -20,18 +20,12 @@ func TestNew(t *testing.T) {
 	var wg sync.WaitGroup
 	wg.Add(1)
 
-	go p.Run()
-
 	for i := 0; i < 10; i++ {
 		p.Add(&hzypool.Worker{
 			Fn:  fn,
 			Arg: nil,
 		})
 	}
-
-	wg.Done()
-	wg.Wait()
-
 }
 
 func fn(ctx context.Context, arg interface{}) error {
