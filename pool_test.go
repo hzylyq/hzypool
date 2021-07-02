@@ -2,22 +2,33 @@ package hzypool_test
 
 import (
 	"context"
-	"github.com/hzylyq/hzypool"
+	"log"
+	"sync"
 	"testing"
-	"time"
+
+	"github.com/stretchr/testify/assert"
+
+	"github.com/hzylyq/hzypool"
 )
 
 func TestNew(t *testing.T) {
-	p := hzypool.New(hzypool.WithSetMaxNum(10))
+	p, err := hzypool.New(hzypool.WithSetMaxNum(10))
+	assert.NoError(t, err)
 
-	p.Add(&hzypool.Worker{
-		Fn:  fn,
-		Arg: nil,
-	})
+	var wg sync.WaitGroup
+	wg.Add(1)
+	for i := 0; i < 10; i++ {
+		p.Add(&hzypool.Worker{
+			Fn:  fn,
+			Arg: nil,
+		})
+	}
 	p.Run()
+	wg.Done()
+	wg.Wait()
 }
 
 func fn(ctx context.Context, arg interface{}) error {
-	time.Sleep(1 * time.Second)
+	log.Print("run 1")
 	return nil
 }

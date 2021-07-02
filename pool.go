@@ -1,26 +1,37 @@
 package hzypool
 
+import (
+	"fmt"
+	"log"
+	"runtime"
+)
+
 type pool struct {
-	MaxWorkNum int
+	maxWorkNum int
 	WorkPool   chan *Worker
 }
 
-func New(sl ...Setter) *pool {
+func New(sl ...Setter) (*pool, error) {
 	p := &pool{}
+	p.maxWorkNum = runtime.NumCPU() * 2
 	for _, s := range sl {
 		s(p)
 	}
 
-	p.WorkPool = make(chan *Worker, p.MaxWorkNum)
+	if p.maxWorkNum < 1 {
+		return nil, fmt.Errorf("must have at least one worker in the pool")
+	}
 
-	return p
+	p.WorkPool = make(chan *Worker, p.maxWorkNum)
+
+	return p, nil
 }
 
 type Setter func(p *pool)
 
 func WithSetMaxNum(num int) Setter {
 	return func(p *pool) {
-		p.MaxWorkNum = num
+		p.maxWorkNum = num
 	}
 }
 
@@ -30,11 +41,17 @@ func (p *pool) Add(w *Worker) {
 
 func (p *pool) dispatch() {
 	go func() {
-		select {
-		case w := <-p.WorkPool:
-			w.do()
+		for {
+			select {
+			case w := <-p.WorkPool:
+				log.Print("case")
+				w.do()
+			default:
+				log.Printf("default")
+			}
 		}
 	}()
+
 }
 
 func (p *pool) Run() {
