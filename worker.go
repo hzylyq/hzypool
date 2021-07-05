@@ -1,6 +1,9 @@
 package hzypool
 
-import "context"
+import (
+	"context"
+	"log"
+)
 
 type fn func(ctx context.Context, arg interface{}) error
 
@@ -19,6 +22,9 @@ func (w *Worker) do() error {
 	ctx, cancel := context.WithTimeout(context.Background(), w.p.maxWorkDuration)
 
 	defer func() {
+		if err := recover(); err != nil {
+			log.Println(err)
+		}
 		cancel()
 	}()
 

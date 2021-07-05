@@ -2,7 +2,6 @@ package hzypool_test
 
 import (
 	"context"
-	"log"
 	"sync"
 	"testing"
 	"time"
@@ -33,7 +32,6 @@ func TestNew(t *testing.T) {
 }
 
 func fn(ctx context.Context, arg interface{}) error {
-	time.Sleep(1 * time.Second)
-	log.Print("run")
+	panic("run")
 	return nil
 }

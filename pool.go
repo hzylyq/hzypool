@@ -2,6 +2,7 @@ package hzypool
 
 import (
 	"fmt"
+	"log"
 	"runtime"
 	"time"
 )
@@ -41,9 +42,11 @@ func (p *pool) dispatch() {
 		for {
 			select {
 			case w := <-p.WorkPool:
+				log.Println("case")
 				w.do()
 			default:
 				w := <-p.WorkPool
+				log.Println("default")
 				w.do()
 			}
 		}
