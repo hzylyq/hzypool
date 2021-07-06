@@ -14,7 +14,7 @@ env:
   workflow_dispatch:
 
 jobs:
-  test: Go-Test
+  test: Test
   strategy:
     fail-fast: false
     matrix:
