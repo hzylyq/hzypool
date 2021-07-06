@@ -21,13 +21,8 @@ func TestNew(t *testing.T) {
 	wg.Add(1)
 
 	for i := 0; i < 10; i++ {
-		p.Add(&hzypool.Worker{
-			Fn:  fn,
-			Arg: nil,
-		})
+		p.Submit(&hzypool.Job{})
 	}
-
-	p.Submit(&hzypool.Job{})
 
 	wg.Done()
 	wg.Wait()
