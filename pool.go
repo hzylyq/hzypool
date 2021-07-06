@@ -8,8 +8,8 @@ import (
 )
 
 type pool struct {
-	WorkPool chan *Worker
-	// Job             chan *Worker
+	workPool        chan *Worker
+	jobs            chan *Job
 	maxWorkNum      int
 	maxWorkDuration time.Duration
 }
@@ -25,7 +25,8 @@ func New(sl ...Setter) (*pool, error) {
 		return nil, fmt.Errorf("must have at least one worker in the pool")
 	}
 
-	p.WorkPool = make(chan *Worker, p.maxWorkNum)
+	p.workPool = make(chan *Worker, p.maxWorkNum)
+	p.jobs = make(chan *Job, 1)
 
 	p.dispatch()
 
@@ -34,20 +35,32 @@ func New(sl ...Setter) (*pool, error) {
 
 func (p *pool) Add(w *Worker) {
 	w.p = p
-	p.WorkPool <- w
+	p.workPool <- w
+}
+func (p *pool) Submit(j *Job) {
+	if j == nil {
+		return
+	}
+
+	p.jobs <- j
 }
 
 func (p *pool) dispatch() {
 	go func() {
-		for {
-			select {
-			case w := <-p.WorkPool:
-				log.Println("case")
-				w.do()
-			default:
-				w := <-p.WorkPool
-				log.Println("default")
-				w.do()
+		for j := range p.jobs {
+			log.Println(j)
+			for {
+				select {
+				case w := <-p.workPool:
+					log.Println("case")
+
+					w.do()
+				default:
+					w := <-p.workPool
+					log.Println("default")
+
+					w.do()
+				}
 			}
 		}
 	}()
