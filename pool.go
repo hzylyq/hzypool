@@ -12,6 +12,7 @@ type pool struct {
 	jobs            chan *Job
 	maxWorkNum      int
 	maxWorkDuration time.Duration
+	logger          Logger
 }
 
 func New(sl ...Setter) (*pool, error) {
