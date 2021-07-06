@@ -27,11 +27,12 @@ func TestNew(t *testing.T) {
 		})
 	}
 
+	p.Submit(&hzypool.Job{})
+
 	wg.Done()
 	wg.Wait()
 }
 
 func fn(ctx context.Context, arg interface{}) error {
-	panic("run")
 	return nil
 }
