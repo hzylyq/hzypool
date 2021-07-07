@@ -4,15 +4,18 @@ import (
 	"fmt"
 	"log"
 	"runtime"
+	"sync"
 	"time"
 )
 
 type pool struct {
+	guard           sync.RWMutex
 	workPool        chan *Worker
 	jobs            chan *Job
 	maxWorkNum      int
 	maxWorkDuration time.Duration
 	logger          Logger
+	runningWorkNum  int
 }
 
 func New(sl ...Setter) (*pool, error) {
@@ -54,13 +57,13 @@ func (p *pool) dispatch() {
 				select {
 				case w := <-p.workPool:
 					log.Println("case")
+					w.submit(j)
 
-					w.do()
 				default:
 					w := <-p.workPool
 					log.Println("default")
+					w.submit(j)
 
-					w.do()
 				}
 			}
 		}
