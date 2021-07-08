@@ -2,7 +2,6 @@ package hzypool
 
 import (
 	"fmt"
-	"log"
 	"runtime"
 	"sync"
 	"time"
@@ -37,9 +36,10 @@ func New(sl ...Setter) (*pool, error) {
 	return p, nil
 }
 
-func (p *pool) Add(w *Worker) {
-	w.p = p
-	p.workPool <- w
+func (p *pool) add(w *Worker) {
+	p.guard.Lock()
+	p.runningWorkNum++
+	p.guard.Unlock()
 }
 func (p *pool) Submit(j *Job) {
 	if j == nil {
@@ -49,27 +49,26 @@ func (p *pool) Submit(j *Job) {
 	p.jobs <- j
 }
 
-func (p *pool) newWorker() *Worker {
-	w := &Worker{}
-	w.p = p
-	w.Jobs = make(chan *Job, 1)
-	w.schedule()
+func (p *pool) NewWorker() *Worker {
+	w := newWorker(p)
+	p.add(w)
 	return w
 }
 
 func (p *pool) dispatch() {
 	go func() {
 		for j := range p.jobs {
-			log.Println(j)
 			for {
 				select {
 				case w := <-p.workPool:
-					log.Println("case")
 					w.submit(j)
 				default:
-					w := <-p.workPool
-					log.Println("default")
-					w.submit(j)
+					if p.runningWorkNum < p.maxWorkNum {
+						p.NewWorker().submit(j)
+					} else {
+						w := <-p.workPool
+						w.submit(j)
+					}
 				}
 			}
 		}

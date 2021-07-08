@@ -21,13 +21,13 @@ func TestNew(t *testing.T) {
 	wg.Add(1)
 
 	for i := 0; i < 10; i++ {
-		p.Submit(&hzypool.Job{})
+		p.Submit(hzypool.NewJob(
+			111, func(ctx context.Context, arg interface{}) error {
+				return nil
+			},
+		))
 	}
 
 	wg.Done()
 	wg.Wait()
-}
-
-func fn(ctx context.Context, arg interface{}) error {
-	return nil
 }

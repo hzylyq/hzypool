@@ -7,8 +7,13 @@ type Worker struct {
 	Jobs chan *Job
 }
 
-func newWorker() *Worker {
-	return &Worker{}
+func newWorker(p *pool) *Worker {
+	w := &Worker{
+		p:    p,
+		Jobs: make(chan *Job, 1),
+	}
+	w.schedule()
+	return w
 }
 
 func (w *Worker) submit(j *Job) {
@@ -20,11 +25,8 @@ func (w *Worker) submit(j *Job) {
 
 func (w *Worker) schedule() {
 	go func() {
-		for {
-			select {
-			case j := <-w.Jobs:
-				w.exec(j)
-			}
+		for j := range w.Jobs {
+			w.exec(j)
 		}
 	}()
 }
@@ -33,12 +35,12 @@ func (w *Worker) exec(j *Job) {
 	ctx, cancel := context.WithTimeout(context.Background(), w.p.maxWorkDuration)
 	defer func() {
 		if r := recover(); r != nil {
-
+			w.p.logger.Printf("%s", r)
 		}
 		cancel()
 		w.p.workPool <- w
 	}()
 	if err := j.Fn(ctx, j.Arg); err != nil {
-
+		w.p.logger.Printf("%s", err)
 	}
 }
