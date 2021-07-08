@@ -6,7 +6,7 @@ type Worker struct {
 }
 
 func newWorker() *Worker {
-
+	return &Worker{}
 }
 
 func (w *Worker) submit(j *Job) {
@@ -14,4 +14,8 @@ func (w *Worker) submit(j *Job) {
 		return
 	}
 	w.Jobs <- j
+}
+
+func (w *Worker) schedule() {
+
 }

@@ -49,6 +49,14 @@ func (p *pool) Submit(j *Job) {
 	p.jobs <- j
 }
 
+func (p *pool) newWorker() *Worker {
+	w := &Worker{}
+	w.p = p
+	w.Jobs = make(chan *Job, 1)
+	w.schedule()
+	return w
+}
+
 func (p *pool) dispatch() {
 	go func() {
 		for j := range p.jobs {
