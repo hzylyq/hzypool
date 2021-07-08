@@ -66,12 +66,10 @@ func (p *pool) dispatch() {
 				case w := <-p.workPool:
 					log.Println("case")
 					w.submit(j)
-
 				default:
 					w := <-p.workPool
 					log.Println("default")
 					w.submit(j)
-
 				}
 			}
 		}
